@@ -1,0 +1,13 @@
+---
+- name: Create 20 files under /var/tmp
+
+  hosts: TEST
+  remote_user: vinod
+  gather_facts: no
+ 
+  tasks:
+  - name: creating files via file module 
+    file:
+     path: /var/tmp/file{{ item }} 
+     state: touch 
+    with_sequence: count=20
