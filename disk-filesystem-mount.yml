@@ -1,0 +1,43 @@
+---
+- hosts: TEST
+  tasks:
+  - name: Create a disk partition on /dev/sdc
+    parted:
+     device: /dev/sdc
+     number: 1
+     part_end: 2GB
+     state: present
+    register: partresult
+
+  - name: create VG/PV on /dev/sdc1
+    lvg:
+     vg: testvg
+     pvs: /dev/sdc1
+     pesize: 4
+    register: vgstatus
+    when: partresult|changed 
+ 
+
+  - name: Create a logical volume on testvg
+    lvol:
+     vg: testvg
+     lv: testvol1
+     size: 200m
+    register: lvstatus
+    when: vgstatus|changed 
+
+  - name: Create a filesystem on testvol1
+    filesystem:
+     dev: /dev/testvg/testvol1
+     fstype: ext3
+    register: filesysstatus
+    when: lvstatus|changed
+
+  - name: mount the testvol1 to new_fs
+    mount:
+     path: /new_fs
+     src: /dev/testvg/testvol1
+     fstype: ext3
+     opts: defaults
+     state: mounted
+    when: filesysstatus|changed
