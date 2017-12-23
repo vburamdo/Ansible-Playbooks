@@ -3,6 +3,7 @@
 - name: find and remove files
   hosts: TEST
   gather_facts: no
+  become: yes
 
   tasks:
   - name: find files which starts from file*
