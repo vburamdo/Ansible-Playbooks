@@ -1,0 +1,35 @@
+---
+- name: create ansible user on hosts
+  hosts: TEST
+  gather_facts: no
+  become: True
+  vars:
+   users:
+   - ansible
+   - kumar
+
+  tasks:
+  - name: creating user ansible
+    user:
+     name: "{{ item }}"
+     state: present
+     comment: Ansible user
+    with_items:
+     - '{{ users }}'
+   
+  - name: adding SSH key
+    authorized_key:
+     user: "{{ item }}"
+     state: present
+     key: "{{ lookup('file', '/home/vinod/.ssh/id_rsa.pub') }}"
+    with_items:
+     - '{{ users }}'
+
+  - name: adding users to sudoers file
+    lineinfile:
+      dest: /etc/sudoers
+      state: present
+      line: '{{ item }} ALL=(ALL) NOPASSWD:ALL '
+      validate: 'visudo -cf %s' 
+    with_items:
+     - '{{ users }}'
