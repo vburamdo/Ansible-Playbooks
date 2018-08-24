@@ -1,0 +1,5 @@
+---
+- name: generating standard motd
+  hosts: TEST
+  become: True
+
